@@ -8,13 +8,13 @@
 
         public required string Description { get; set; }
 
-        public required  double LengthInKm { get; set; }
+        public required double LengthInKm { get; set; }
 
-        public string? WalkImageUrl { get; set; }   
+        public string WalkImageUrl { get; set; }
 
         public Guid DifficultId { get; set; }
 
-        public Guid RegionId { get; set; }  
+        public Guid RegionId { get; set; }
 
 
         //Navigation properties

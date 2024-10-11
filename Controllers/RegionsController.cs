@@ -28,9 +28,10 @@ namespace MyFirstrestFulApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllRegions()
+        public async Task<IActionResult> GetAllRegions()
         {
-            var regions = _dbContext.Regions.ToList();
+            var regions = await _dbContext.Regions.ToListAsync();
+
             if (regions.Count == 0)
             {
                 return NotFound("No Regions Found");
@@ -54,10 +55,10 @@ namespace MyFirstrestFulApi.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public IActionResult GetRegionById([FromRoute] Guid id)
+        public async Task<IActionResult> GetRegionById([FromRoute] Guid id)
         {
-            var region = _dbContext.Regions.Find(id);
-            var regionById = _dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var region = await _dbContext.Regions.FindAsync(id);
+            // var regionById = await _dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
             if (region == null)
             {
                 return NotFound($"Region with {id} not Found");
@@ -67,7 +68,7 @@ namespace MyFirstrestFulApi.Controllers
 
 
         [HttpPost]
-        public IActionResult AddANewRegion([FromBody] AddRegionDto addRegion)
+        public async Task<IActionResult> AddANewRegion([FromBody] AddRegionDto addRegion)
         {
             //Map or convert DTO to domain model
             var region = new Region
@@ -78,8 +79,8 @@ namespace MyFirstrestFulApi.Controllers
             };
 
             //Use Domain Model to create region
-            _dbContext.Regions.Add(region);
-            _dbContext.SaveChanges();
+            await _dbContext.Regions.AddAsync(region);
+            await _dbContext.SaveChangesAsync();
 
             var regionDto = MapToRegionDto(region);
 
@@ -88,10 +89,10 @@ namespace MyFirstrestFulApi.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionDto updateRegion)
+        public async Task<IActionResult> UpdateRegion([FromRoute] Guid id, [FromBody] UpdateRegionDto updateRegion)
         {
 
-            var foundRegion = _dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var foundRegion = await _dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
             if (foundRegion == null)
             {
@@ -99,24 +100,23 @@ namespace MyFirstrestFulApi.Controllers
             }
 
             //Mapping Dto to Model
-            var region = new Region
-            {
-                Name = updateRegion.Name,
-                Code = updateRegion.Code,
-                RegionImageUrl = updateRegion.RegionImageUrl
-            };
-            _dbContext.SaveChanges();
-            // Convert Domain Model to Dto
-            var regionDto = MapToRegionDto(region);
 
-            return Ok("Successfully Updated Region");
+            foundRegion.Name = updateRegion.Name;
+            foundRegion.Code = updateRegion.Code;
+            foundRegion.RegionImageUrl = updateRegion.RegionImageUrl;
+
+            await _dbContext.SaveChangesAsync();
+            // Convert Domain Model to Dto
+            var regionDto = MapToRegionDto(foundRegion);
+
+            return Ok(regionDto);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult deleteRegion([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteRegion([FromRoute] Guid id)
         {
-            var foundRegion = _dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var foundRegion = await _dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
             if (foundRegion == null)
             {
@@ -124,7 +124,7 @@ namespace MyFirstrestFulApi.Controllers
             }
 
             var deletedRegion = _dbContext.Regions.Remove(foundRegion);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             // var RegionDto = new RegionDto
             // {
